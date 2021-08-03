@@ -1,0 +1,10 @@
+[Unit]                                                                          
+Description=Bootstrap script                                
+After=network.target                                                            
+                                                                                
+[Service]                                                                       
+ExecStart=/usr/local/bin/mfg_bootstrap.py bootstrap                                 
+RemainAfterExit=True                                                            
+                                                                                
+[Install]                                                                       
+WantedBy=multi-user.target
