@@ -1,0 +1,142 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "Wiwynn Diagnosis"
+basePath: "/"
+schemes:
+  - "http"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+paths:
+  /agent:
+    post:
+      summary: Collecting logs
+      tags:
+        - Fluentd Sender
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Agent to collect required types of logs to fluentd.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            required:
+              - type
+            properties:
+              type:
+                type: string
+                example: "sel, dmesg"
+      responses:
+        200:
+          description: OK
+        400:
+          description: "Input Error"
+
+  /query:
+    get:
+      tags:
+        - "Query Service"
+      summary: Query service
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Query logs and return diagnosis result according to the condition.
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            required:
+              - type
+            properties:
+              SN:
+                type: string
+                example: "B81XXXXXXXXXXXXXXSA"
+              PPN:
+                type: string
+                example: "BXX.XXXXX.XXXX5"
+              product_name:
+                type: string
+                example: "SV300G3"
+              date:
+                type: string
+                example: "MM/DD/YYYY"
+      responses:
+        200:
+          description: OK
+        400:
+          description: "Invalid Query"
+  /query/template:
+    get:
+      tags:
+        - "Query Service"
+      summary: "Get template in the searching engine."
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: query
+          schema:
+            properties:
+              type:
+                type: string
+                example: "Fan"
+      responses:
+        200:
+          description: OK
+        400:
+          description: "Search template Error"
+  # /query/template/{error_type}:
+  #   get:
+  #     tags:
+  #       - "Query Service"
+  #     summary: "Get error type template from elasticsearch."
+  #     parameters:
+  #       - in: body
+  #         name: body
+  #         required: true
+  #         schema:
+  #           required:
+  #             - error_type
+  #           example:
+              
+  #     responses:
+  #       200:
+  #         description: OK
+  #       400:
+  #         description: "Post template Error"
+
+    post:
+      tags:
+        - "Query Service"
+      summary: "Post new error type template to elasticsearch."
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            example:
+              {
+                "script":
+                  {
+                    "lang": "mustache",
+                    "source":
+                      {
+                        "query":
+                          { "match": { "{{your_field}}": "{{your_value}}" } },
+                      },
+                  },
+              }
+      responses:
+        200:
+          description: OK
+        400:
+          description: "Post template Error"
