@@ -1,8 +1,30 @@
+import threading
+import requests
+import sys
+
+from flask import Flask, request
+from lib.fluentd_client import *
+sys.path.append("..")
 
 
 def create_app():
-    pass
+    app = Flask(__name__)
 
+    @app.route('/', methods=['POST'])
+    def send_to_fluentd(log_type_list):
+        '''
+        { "type": "sel, dmesg" }
+        '''
+        types = request.json["type"]
+        log_type_list = types.split(", ")
+        threads = []
+        n_thread = len(log_type_list)
+        fluentd_client = FluentdClient()
+        for i in range(n_thread):
+            threads.append(threading.Thread(
+                target=fluentd_client.send_logs, args=[log_type_list[i], ]))
+            threads[i].start()
+    return app
 
 
 if __name__ == '__main__':
@@ -13,3 +35,4 @@ if __name__ == '__main__':
     CORS(app, allow_headers='*', origins='*')
     app.run(host='0.0.0.0', port=55666, threaded=True, debug=True)
     # swagger UI: http://0.0.0.0:55666/v1/ui/
+
