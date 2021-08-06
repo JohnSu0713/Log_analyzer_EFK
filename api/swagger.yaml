@@ -11,6 +11,7 @@ consumes:
 produces:
   - "application/json"
 paths:
+# Agent which send log to the fluentd
   /agent:
     post:
       summary: Collecting logs
@@ -23,102 +24,89 @@ paths:
       description: Agent to collect required types of logs to fluentd.
       parameters:
         - in: body
-          name: body
+          name: status
           required: true
           schema:
-            required:
-              - type
-            properties:
-              type:
-                type: string
-                example: "sel, dmesg"
+            type: array
+            example: ["sel, dmesg"]
+            items:
+              type: string
+              example: "sel"
       responses:
         200:
           description: OK
         400:
           description: "Input Error"
-
+# Query Error type by certain condition
   /query:
     get:
       tags:
         - "Query Service"
-      summary: Query service
+      summary: Query target
       consumes:
         - application/json
       produces:
         - application/json
       description: Query logs and return diagnosis result according to the condition.
       parameters:
-        - in: body
-          name: body
-          required: true
-          schema:
-            required:
-              - type
-            properties:
-              SN:
-                type: string
-                example: "B81XXXXXXXXXXXXXXSA"
-              PPN:
-                type: string
-                example: "BXX.XXXXX.XXXX5"
-              product_name:
-                type: string
-                example: "SV300G3"
-              date:
-                type: string
-                example: "MM/DD/YYYY"
+        - in: query
+          name: model
+          type: string
+        - in: query
+          name: serial_num
+          type: string
+        - in: query
+          name: part_num
+          type: string
+        - in: query
+          name: created_on
+          type: string
+          format: date
       responses:
         200:
           description: OK
         400:
           description: "Invalid Query"
-  /query/template:
+  # List and query current searching template
+  /pattern: 
     get:
       tags:
-        - "Query Service"
-      summary: "Get template in the searching engine."
+        - "Searching Pattern"
+      summary: Query searching template
       consumes:
         - application/json
       produces:
         - application/json
+      description: Lookup certain error searching template.
       parameters:
-        - in: body
-          name: query
-          schema:
-            properties:
-              type:
-                type: string
-                example: "Fan"
+        - in: query
+          name: error_type
+          type: string
+        - in: query
+          name: sensor_type
+          type: string
+        - in: query
+          name: description message
+          type: string
+        - in: query
+          name: pattern_id
+          type: string
+ 
       responses:
         200:
           description: OK
         400:
-          description: "Search template Error"
-  # /query/template/{error_type}:
-  #   get:
-  #     tags:
-  #       - "Query Service"
-  #     summary: "Get error type template from elasticsearch."
-  #     parameters:
-  #       - in: body
-  #         name: body
-  #         required: true
-  #         schema:
-  #           required:
-  #             - error_type
-  #           example:
-              
-  #     responses:
-  #       200:
-  #         description: OK
-  #       400:
-  #         description: "Post template Error"
-
+          description: "Template Not Found."
+    # Add new error pattern template to DB.
     post:
       tags:
-        - "Query Service"
-      summary: "Post new error type template to elasticsearch."
+        - "Searching Pattern"
+      summary: Add new Error pattern
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Add new error pattern template to DB.
       parameters:
         - in: body
           name: body
@@ -140,4 +128,96 @@ paths:
         200:
           description: OK
         400:
-          description: "Post template Error"
+          description: "Template Not Found."
+
+    delete:
+      tags:
+        - "Searching Pattern"
+      summary: Delete certain error pattern
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      description: Lookup and delete certain error searching pattern.
+      parameters:
+        - in: query
+          name: pattern_id
+          type: string
+ 
+      responses:
+        200:
+          description: OK
+        400:
+          description: "Template Not Found."
+      
+  
+
+  # ================= progress ===================
+  # /query/template:
+  #   get:
+  #     tags:
+  #       - "Query Service"
+  #     summary: "Get template in the searching engine."
+  #     consumes:
+  #       - application/json
+  #     produces:
+  #       - application/json
+  #     parameters:
+  #       - in: body
+  #         name: query
+  #         schema:
+  #           properties:
+  #             type:
+  #               type: string
+  #               example: "Fan"
+  #     responses:
+  #       200:
+  #         description: OK
+  #       400:
+  #         description: "Search template Error"
+  # /query/template/{error_type}:
+  #   get:
+  #     tags:
+  #       - "Query Service"
+  #     summary: "Get error type template from elasticsearch."
+  #     parameters:
+  #       - in: body
+  #         name: body
+  #         required: true
+  #         schema:
+  #           required:
+  #             - error_type
+  #           example:
+              
+  #     responses:
+  #       200:
+  #         description: OK
+  #       400:
+  #         description: "Post template Error"
+
+  #   post:
+  #     tags:
+  #       - "Query Service"
+  #     summary: "Post new error type template to elasticsearch."
+  #     parameters:
+  #       - in: body
+  #         name: body
+  #         required: true
+  #         schema:
+  #           example:
+  #             {
+  #               "script":
+  #                 {
+  #                   "lang": "mustache",
+  #                   "source":
+  #                     {
+  #                       "query":
+  #                         { "match": { "{{your_field}}": "{{your_value}}" } },
+  #                     },
+  #                 },
+  #             }
+  #     responses:
+  #       200:
+  #         description: OK
+  #       400:
+  #         description: "Post template Error"

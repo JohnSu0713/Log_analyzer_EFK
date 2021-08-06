@@ -53,18 +53,16 @@ class FluentdClient():
             sel = lib.ipmi.Ipmi()
             sel.dump_sels()
             self.log_list = sel.log_list
-            self.get_fru()
-            self.merge_fru()
             self.port = os.getenv("SEL_PORT")
 
         elif log_type.lower() == "dmesg":
             syslog = lib.system.System()
             syslog.dump_dmesg()
             self.log_list = syslog.log_list
-            self.get_fru()
-            self.merge_fru()
             self.port = os.getenv("DMESG_PORT")
 
+        self.get_fru()
+        self.merge_fru()
         url = f"http://{self.ip}:{self.port}/{log_type.lower()}"
 
         # Send logs to Fluentd
