@@ -121,7 +121,6 @@ paths:
 
         400:
           description: "Template Not Found."
-
     delete:
       tags:
         - "Searching Pattern"

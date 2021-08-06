@@ -1,9 +1,9 @@
 import threading
-import sys
-sys.path.append("..")
+from flask_cors import CORS
+
 
 from flask import Flask, request
-from lib.fluentd_client import *
+from lib.fluentd_client import FluentdClient
 
 
 
