@@ -3,7 +3,7 @@ from flask_cors import CORS
 
 
 from flask import Flask, request
-from lib.fluentd_client import FluentdClient
+from fluentd_client import FluentdClient
 
 
 
@@ -23,6 +23,7 @@ def create_app():
             threads.append(threading.Thread(
                 target=fluentd_client.send_logs, args=[log_type_list[i], ]))
             threads[i].start()
+        return "200"
     return app
 
 

@@ -13,3 +13,4 @@ class System():
 
         self.log_list = [{"raw_message": line}
                          for line in self.raw_logs.splitlines()]
+        print("debug_dmesg size: ", len(self.log_list))
