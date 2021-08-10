@@ -10,7 +10,7 @@ consumes:
 produces:
   - "application/json"
 paths:
-  # Agent which send log to the fluentd
+  # ================= Agent ===================
   /agent:
     post:
       summary: Collecting logs
@@ -36,7 +36,8 @@ paths:
           description: "Sending success"
         400:
           description: "Input Error"
-  # Query Error type by certain condition
+
+  # ================= Query Service ===================
   /query:
     get:
       tags:
@@ -66,8 +67,9 @@ paths:
           description: OK
         400:
           description: "Invalid Query"
-  # List and query current searching template
-  /pattern:
+
+  # ================= Searching Pattern Ops ===================
+  /patterns:
     get:
       tags:
         - "Searching Pattern"
@@ -79,16 +81,13 @@ paths:
       description: Lookup certain error searching template.
       parameters:
         - in: query
-          name: error_type
+          name: "sensor_type" # CPU
           type: string
         - in: query
-          name: sensor_type
+          name: model # Gen6
           type: string
         - in: query
-          name: description message
-          type: string
-        - in: query
-          name: pattern_id
+          name: error_type # IERR
           type: string
 
       responses:
@@ -140,8 +139,8 @@ paths:
           description: OK
         400:
           description: "Template Not Found."
-  
-# ================= definitions: ===================
+
+# ================= definitions ===================
 definitions:
   pattern:
     type: "object"

@@ -30,3 +30,14 @@ services:
       - "elasticsearch"
     ports:
       - "5601:5601"
+  
+  db:
+    image: postgres:13
+    restart: always
+    container_name: diagnosis_postgres
+    ports:
+      - 5487:5432
+    volumes:
+      - /home/john/diagnosis/postgreDATA:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: postgres
