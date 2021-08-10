@@ -63,7 +63,7 @@ class FluentdClient():
 
         self.get_fru()
         self.merge_fru()
-        url = f"http://{self.ip}:{self.port}/{log_type.lower()}"
+        url = f"http://{self.ip}:{self.port}/{log_type.lower()}.log"
 
         # Send logs to Fluentd
         payload = json.dumps(self.log_list)
