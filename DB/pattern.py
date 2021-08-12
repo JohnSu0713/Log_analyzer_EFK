@@ -1,17 +1,18 @@
-from db_Ops import DB_reinit, connect_DB, DB_init, close_DB, show_DB
+from db_Ops import DataBaseOps
 from playhouse.postgres_ext import *
+from table import *
 db = PostgresqlExtDatabase(
     'diagnosisDB', user="postgres", password='postgres', host='127.0.0.1', port=5487)
 
 
 # ======== Main function ========
-connect_DB()
-
-
-DB_reinit()
-# show_DB()
-
-close_DB()
-
+Ops = DataBaseOps()
+Ops.connect_DB()
+# db.create_tables([Product, Pattern])
+Ops.restart_DB()
+Ops.init_DB()
+print(db.get_tables())
+Ops.show_DB()
+Ops.close_DB()
 # ======== Method usage ========
 # db.drop_tables([Query])
