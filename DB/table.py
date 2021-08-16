@@ -1,9 +1,8 @@
 from playhouse.postgres_ext import *
 
 
-class Model(Model):
-
-    Model_name = CharField(primary_key=True, null=True)
+class Project(Model):
+    project_name = CharField(primary_key=True, null=True)
 
     class Meta:
         database = PostgresqlExtDatabase(
@@ -16,7 +15,7 @@ class Pattern(Model):
     error = CharField(null=True)
     sensor = CharField(null=True)
     query = BinaryJSONField(null=True)
-    product = ForeignKeyField(Model, backref='product', null=True)
+    project = ForeignKeyField(Project, backref='project', null=True)
 
     class Meta:
         database = PostgresqlExtDatabase(

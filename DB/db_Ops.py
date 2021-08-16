@@ -25,101 +25,100 @@ class DataBaseOps():
             print("\n========== DB Closed ========== ")
 
     def show_DB(self):
-        product_table = BeautifulTable()
+        project_table = BeautifulTable()
         pattern_table = BeautifulTable()
 
         print("---------- Product Table ----------\n")
-        product_table.rows.append(["product_id", "product name"])
-        for product in Product.select():
-            product_table.rows.append(
-                [product.product_id, product.product_name])
-        print(product_table)
+        project_table.rows.append(["project name"])
+        for product in Project.select():
+            project_table.rows.append(
+                [product.project_name])
+        print(project_table)
         print()
         print("---------- Pattern Table ----------\n")
         pattern_table.rows.append(
-            ["id", "error", "sensor", 'query', 'product'])
+            ["id", "error", "sensor", 'query', 'project'])
         for pattern in Pattern.select():
             pattern_table.rows.append(
-                [pattern.id, pattern.error, pattern.sensor, pattern.query, pattern.product])
+                [pattern.id, pattern.error, pattern.sensor, pattern.query, pattern.project])
         print(pattern_table)
         print()
         print("DB Tables: ", self.db.get_tables())
 
-    # def get_pattern(self, model=None, sensor=None):
-    #     pattern_list = []
-    #     if model == None and sensor == None:
-    #         for error in Error.select():
-    #             pattern_list.append(error.query)
-    #     elif sensor != None:
-    #         for error in Error.select().where(Error.sensor == sensor.lower()):
-    #             pattern_list.append(error.query)
-    #     elif model != None:
-    #         for model in Product.select().where(Product.model == model):
-    #             pattern_list.append(model.error.query)
-    #     return pattern_list
+    def get_pattern(self, project=None, sensor=None, error=None):
+        '''
+        get_pattern(project='ambrose', sensor='fan', error='IERR')
+        pattern_list is a bounch of pattern select objects with id, error, sensor, query, project..
+        '''
+        pattern_list = []
+        # List all pattern
+        if project == None and sensor == None and error == None:
+            for pattern in Pattern.select():
+                pattern_list.append(pattern)
 
-    # def update_pattern(self, pattern, error=None, sensor=None, model=None):
-    #     error_exist = Error.get_or_none(error=error)
-    #     model_exist = Product.get_or_none(model=model)
-    #     # 純 Update
-    #     if error_exist:
-    #         query = Error.update(query=pattern).where(Error.error == error)
-    #         query.execute()
-    #     else:
-    #         if sensor == None:
-    #             return "Missing sensor field."
-    #         error = Error.get_or_create(
-    #             error=error, sensor=sensor, query=pattern)
-    #     # if user input model
-    #     if model != None:
-    #         if error == None:
-    #             return "Missing error field."
-    #         error = Error.select().where(Error.error == error)
-    #         if model_exist:  # Exist model
-    #             query = Product.update(error=error).where(
-    #                 Product.model == model)
-    #             query.execute()
-    #         else:  # New model
-    #             Product.get_or_create(model=model, error=error)
+        elif project:
+            if sensor:
+                if error:
+                    for pattern in Pattern.select().where(Pattern.project == project, Pattern.sensor == sensor, Pattern.error == error):
+                        pattern_list.append(pattern)
+                else:
+                    for pattern in Pattern.select().where(Pattern.project == project, Pattern.sensor == sensor):
+                        pattern_list.append(pattern)
+            elif error:
+                for pattern in Pattern.select().where(Pattern.project == project, Pattern.error == error):
+                    pattern_list.append(pattern)
+            else:
+                for pattern in Pattern.select().where(Pattern.project == project):
+                    pattern_list.append(pattern)
+        elif sensor:
+            if error:
+                for pattern in Pattern.select().where(Pattern.sensor == sensor, Pattern.error == error):
+                    pattern_list.append(pattern)
+            else:
+                for pattern in Pattern.select().where(Pattern.sensor == sensor):
+                    pattern_list.append(pattern)
+        else:
+            return "Invalid Input."
+        return pattern_list
 
-        #     # Error not specify, sensor not specify
-        # if error == None and sensor == None:
-        #     error = Error.get_or_create(
-        #         error=error, sensor=sensor, query=pattern)
-        # if error_exist:
-        #     query = Error.update(query=pattern).where(Error.error == error)
-        #     query.execute()
-        # if sensor_exist:
-        #     query = Error.update(query=pattern).where(Error.sensor == sensor)
-        #     query.execute()
+    def update_pattern(self, pattern, project=None, sensor=None, error=None, id=None):
+        # Directly update by exist id
+        id_exist = Pattern.get_or_none(id=id)
+        if id_exist:
+            query = Pattern.update(query=pattern).where(Pattern.id == id)
+            query.execute()
 
-        # if model_exist == None and error_exist != None:
-        #     Product.create(model=model, error=error)
-        # elif error_exist
+        if (not pattern) or (not project) or (not sensor) or (not error):
+            return "Incomplete input."
 
-        # error_exist = Error.get_or_none(error=error)
-        # sensor_exist = Error.get_or_none(sensor=sensor)
-        # model_exist = Product.get_or_none(model=model)
+        project_exist = Project.get_or_none(project_name=project)
+        error_exist = Pattern.get_or_none(
+            project=project, sensor=sensor, error=error)
 
-        # elif error != None:
-        #     pass
-        # elif sensor != None:
-        #     pass
-        # elif model != None:
-        #     pass
+        if not project_exist:
+            new_project = Project.get_or_create(
+                project_name=project)
 
-        #     if error_exist != None:
-        #         query = Error.update(query=pattern).where(Error.error == error)
-        #         query.execute()
-        #     else:
-        #         Error.get_or_create(
-        #             error=error, sensor=sensor, query=pattern)
+        if error_exist:
+            query = Pattern.update(query=pattern).where(
+                Pattern.project == project, Pattern.sensor == sensor, Pattern.error == error)
+        else:
+            new_pattern = Pattern.get_or_create(
+                project=project, sensor=sensor, error=error, query=pattern)
+
+        return "200"
+
+    def delete_pattern(self, id=None):
+        if id:
+            del_pattern = Pattern.delete().where(Pattern.id == id)
+            return
+        return
 
     def restart_DB(self):
         print("Before drop: ", self.db.get_tables())
-        self.db.drop_tables([Product, Pattern], cascade=True)
+        self.db.drop_tables([Project, Pattern], cascade=True)
         print("Empty: ", self.db.get_tables())
-        self.db.create_tables([Product, Pattern])
+        self.db.create_tables([Project, Pattern])
         print("Table restart: ", self.db.get_tables())
 
     def init_DB(self):
@@ -127,8 +126,8 @@ class DataBaseOps():
         products = ProductData()
 
         for model_data in products.product_types:
-            model = Product.get_or_create(product_name=model_data)
+            model = Project.get_or_create(project_name=model_data)
         for error_data, sensor_data, query_data in errors.error_data:
-            for product in Product.select():
+            for project in Project.select():
                 pattern = Pattern.get_or_create(
-                    error=error_data, sensor=sensor_data, query=query_data, product=product)
+                    error=error_data, sensor=sensor_data, query=query_data, project=project)
