@@ -21,7 +21,7 @@ class QuerySender():
         elif PN:
             for query in self.query_list:
                 query['query']['bool']['filter'] = [
-                    {"match": {"project_name": PN}}]
+                    {"match": {"product_name": PN}}]
         elif PPN:
             for query in self.query_list:
                 query['query']['bool']['filter'] = [{"match": {"PPN": PPN}}]
@@ -41,8 +41,11 @@ class QuerySender():
         headers = {
             'Content-Type': 'application/json'
         }
+        print(self.payload)
         response = requests.request(
             "GET", self.url, headers=headers, data=self.payload)
+        print(response)
+        
         return response
 
 
